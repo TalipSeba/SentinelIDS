@@ -1,34 +1,27 @@
 from logger import write_log
 from detector import detect_event
-from tracker import track_ip, is_suspicious
+from tracker import track_ip, track_port, is_suspicious, is_port_scan
+from traffic_generator import generate_event
 
-events = [
 
-    ("INFO", "192.168.1.20 connected to port 80"),
+for i in range(10):
 
-    ("INFO", "192.168.1.20 connected to port 443"),
-
-    ("WARNING", "192.168.1.20 tried multiple ports"),
-
-    ("INFO", "192.168.1.30 connected to port 22"),
-
-    ("INFO", "192.168.1.20 connected to port 21"),
-
-    ("INFO", "192.168.1.30 connected to port 25")
-]
-
-for level, message in events:
+    level, message = generate_event()
 
     write_log(level, message)
 
     ip = message.split()[0]
+    port = message.split()[-1]
 
     count = track_ip(ip)
-
     print(f"{ip} has sent {count} requests")
-    
+    port_count = track_port(ip, port)
+    print(f"{ip} has tried {port_count} different ports")
+
     if is_suspicious(ip):
-     write_log("WARNING", f"Suspicious IP activity detected from {ip}")
+        write_log("WARNING", f"Suspicious IP activity detected from {ip}")
+    if is_port_scan(ip):
+        write_log("ALERT", f"Port scan behavior detected from {ip}")
 
     detection = detect_event(message)
 
