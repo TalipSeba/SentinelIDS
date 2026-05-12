@@ -31,3 +31,19 @@ def is_port_scan(ip):
         return True
 
     return False
+
+failed_logins = {}
+def track_failed_login(ip):
+
+    if ip not in failed_logins:
+        failed_logins[ip] = 0
+
+    failed_logins[ip] += 1
+
+    return failed_logins[ip]
+def is_bruteforce(ip):
+
+    if failed_logins[ip] >= 5:
+        return True
+
+    return False

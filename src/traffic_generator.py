@@ -23,3 +23,15 @@ def generate_event():
        port = random.choice(ports)
 
     return ("INFO", f"{ip} connected to port {port}")
+
+def generate_login_event():
+
+    ip = attacker_ip
+
+    usernames = ["admin", "root", "user", "test"]
+    passwords = ["123456", "admin", "password", "qwerty"]
+
+    username = random.choice(usernames)
+    password = random.choice(passwords)
+
+    return ("LOGIN_FAILED", f"{ip} failed login with username={username} password={password}")
