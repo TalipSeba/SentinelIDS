@@ -176,43 +176,7 @@ Today SentinelIDS successfully simulated and detected brute-force attacks in rea
 
 ---
 
-# Problems Faced
 
-## 1. Infinite monitoring loop control
-
-Problem:
-The IDS system continuously ran without stopping.
-
-Solution:
-Used:
-
-CTRL + C
-
-to manually stop the monitoring engine.
-
-This generated a normal:
-
-KeyboardInterrupt
-
-message.
-
----
-
-## 2. Brute-force alert initially did not appear
-
-Problem:
-The system stopped before reaching the failed login threshold.
-
-Solution:
-Allowed the system to continue running until:
-5 failed logins
-
-were reached.
-
-After that:
-Brute force alerts were successfully generated.
-
----
 
 # Next Goals
 
