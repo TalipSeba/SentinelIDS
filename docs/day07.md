@@ -104,17 +104,6 @@ pip install flask --break-system-packages
 
 ---
 
-## 2. Flask Server Process
-
-The Flask server occupied the terminal session while running.
-
-Solution:
-
-The server was stopped safely using:
-
-CTRL + C
-
----
 
 # Results
 
