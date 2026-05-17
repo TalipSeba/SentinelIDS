@@ -4,24 +4,19 @@ connection = sqlite3.connect("sentinelids.db")
 
 cursor = connection.cursor()
 
-cursor.execute("SELECT * FROM attack_logs")
+cursor.execute("""
+SELECT ip, MAX(threat_score)
+FROM attack_logs
+""")
 
 rows = cursor.fetchall()
 
 print("\n=== SentinelIDS Attack Logs ===\n")
 
-for row in rows:
-    log_id = row[0]
-    timestamp = row[1]
-    ip = row[2]
-    event_type = row[3]
-    threat_score = row[4]
+dangerous_ip = rows[0][0]
+max_score = rows[0][1]
 
-    print(f"ID: {log_id}")
-    print(f"Time: {timestamp}")
-    print(f"IP Address: {ip}")
-    print(f"Event Type: {event_type}")
-    print(f"Threat Score: {threat_score}")
-    print("-" * 40)
+print(f"\nMost Dangerous IP: {dangerous_ip}")
+print(f"Highest Threat Score: {max_score}\n")
 
 connection.close()
