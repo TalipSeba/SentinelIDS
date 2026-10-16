@@ -20,7 +20,7 @@ def track_port(ip, port):
 
 
 def is_suspicious(ip):
-    if ip_counts[ip] >= 4:
+    if ip_counts.get(ip, 0) >= 4:
         return True
 
     return False
@@ -43,7 +43,7 @@ def track_failed_login(ip):
     return failed_logins[ip]
 def is_bruteforce(ip):
 
-    if failed_logins[ip] >= 5:
+    if failed_logins.get(ip, 0) >= 5:
         return True
 
     return False

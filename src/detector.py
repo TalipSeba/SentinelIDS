@@ -1,9 +1,12 @@
-def detect_event(message):
+def parse_event(level, message):
 
-    if "multiple ports" in message:
+    parts = message.split()
+    ip = parts[0]
 
-        ip = message.split()[0]
+    if level == "LOGIN_FAILED":
+        return "LOGIN_FAILED", ip, None
 
-        return "ALERT", f"Possible port scan detected from {ip}"
+    if "connected to port" in message:
+        return "CONNECTION", ip, parts[-1]
 
-    return None
+    return None, ip, None
