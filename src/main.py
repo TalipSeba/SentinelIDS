@@ -5,7 +5,11 @@ from traffic_generator import generate_event, generate_login_event
 from threat_score import increase_score, is_high_risk
 from database import save_attack
 from datetime import datetime
+from config import LOG_DIR
+import os
 import time
+
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 while True:

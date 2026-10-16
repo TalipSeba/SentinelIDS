@@ -1,12 +1,14 @@
 from flask import Flask
 import sqlite3
+import database
+from config import DB_PATH
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
 
-    connection = sqlite3.connect("sentinelids.db")
+    connection = sqlite3.connect(DB_PATH)
 
     cursor = connection.cursor()
 

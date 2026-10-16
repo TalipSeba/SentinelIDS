@@ -1,6 +1,7 @@
 import sqlite3
+from config import DB_PATH
 
-connection = sqlite3.connect("sentinelids.db")
+connection = sqlite3.connect(DB_PATH)
 
 cursor = connection.cursor()
 
