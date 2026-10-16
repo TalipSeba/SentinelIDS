@@ -1,3 +1,4 @@
 __pycache__/
 *.pyc
-logs/system.log.pytest_cache/
+logs/system.log
+.pytest_cache/
