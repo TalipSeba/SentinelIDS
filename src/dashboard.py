@@ -12,7 +12,7 @@ def get_stats():
     cursor.execute("SELECT COUNT(*) FROM attack_logs")
     total_attacks = cursor.fetchone()[0]
 
-    cursor.execute("SELECT MAX(threat_score) FROM attack_logs")
+    cursor.execute("SELECT COALESCE(MAX(threat_score), 0) FROM attack_logs")
     max_score = cursor.fetchone()[0]
 
     cursor.execute("""
@@ -48,6 +48,19 @@ def get_stats():
     """)
 
     top_attackers = cursor.fetchall()
+
+    cursor.execute("SELECT COUNT(DISTINCT ip) FROM attack_logs")
+    unique_ips = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM attack_logs WHERE event_type = 'BRUTE_FORCE'")
+    brute_force_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM attack_logs WHERE event_type = 'PORT_SCAN'")
+    port_scan_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(DISTINCT ip) FROM attack_logs WHERE event_type = 'HIGH_RISK'")
+    high_risk_ips = cursor.fetchone()[0]
+
     connection.close()
 
     return {
@@ -57,6 +70,10 @@ def get_stats():
         "recent_attacks": recent_attacks,
         "attack_type_counts": attack_type_counts,
         "top_attackers": top_attackers,
+        "unique_ips": unique_ips,
+        "brute_force_count": brute_force_count,
+        "port_scan_count": port_scan_count,
+        "high_risk_ips": high_risk_ips,
     }
 
 
@@ -71,6 +88,10 @@ def home():
     recent_attacks = stats["recent_attacks"]
     attack_type_counts = stats["attack_type_counts"]
     top_attackers = stats["top_attackers"]
+    unique_ips = stats["unique_ips"]
+    brute_force_count = stats["brute_force_count"]
+    port_scan_count = stats["port_scan_count"]
+    high_risk_ips = stats["high_risk_ips"]
 
     chart_labels = [item[0] for item in attack_type_counts]
     chart_values = [item[1] for item in attack_type_counts]
@@ -101,7 +122,7 @@ def home():
     </div>
 
     <div style="background:#1e293b; padding:20px; border-radius:10px; width:250px;">
-        <h3>Total Attacks</h3>
+        <h3>Total Alerts</h3>
         <h2 style="color:#38bdf8;">{total_attacks}</h2>
     </div>
 
@@ -112,10 +133,35 @@ def home():
 
     <div style="background:#1e293b; padding:20px; border-radius:10px; width:250px;">
         <h3>Most Dangerous IP</h3>
-        <h2 style="color:#facc15;">{dangerous_ip}</h2>
+        <h2 style="color:#facc15;">{dangerous_ip or "-"}</h2>
+    </div>
+</div>
+
+    <div style="display:flex; gap:20px; margin-top:20px;">
+
+    <div style="background:#1e293b; padding:20px; border-radius:10px; width:250px;">
+        <h3>Unique Source IPs</h3>
+        <h2 style="color:#38bdf8;">{unique_ips}</h2>
+    </div>
+
+    <div style="background:#1e293b; padding:20px; border-radius:10px; width:250px;">
+        <h3>Brute Force Alerts</h3>
+        <h2 style="color:#fb923c;">{brute_force_count}</h2>
+    </div>
+
+    <div style="background:#1e293b; padding:20px; border-radius:10px; width:250px;">
+        <h3>Port Scan Alerts</h3>
+        <h2 style="color:#facc15;">{port_scan_count}</h2>
+    </div>
+
+    <div style="background:#1e293b; padding:20px; border-radius:10px; width:250px;">
+        <h3>High Risk IPs</h3>
+        <h2 style="color:#ef4444;">{high_risk_ips}</h2>
     </div>
 
 </div>
+
+
     <h2 style="margin-top:40px; color:#38bdf8;">
     Recent Attacks
 </h2>
