@@ -100,8 +100,9 @@ def home():
     port_scan_count = stats["port_scan_count"]
     high_risk_ips = stats["high_risk_ips"]
 
-    chart_labels = [item[0] for item in attack_type_counts]
-    chart_values = [item[1] for item in attack_type_counts]
+    type_counts = dict(attack_type_counts)
+    chart_labels = list(ATTACK_COLORS)
+    chart_values = [type_counts.get(label, 0) for label in chart_labels]
     chart_colors = [ATTACK_COLORS.get(label, "#38bdf8") for label in chart_labels]
     return f"""
 <html>
@@ -266,15 +267,26 @@ Attack Distribution Chart
 const ctx = document.getElementById('attackChart');
 
 new Chart(ctx, {{
-    type: 'pie',
+    type: 'bar',
     data: {{
         labels: {json.dumps(chart_labels)},
         datasets: [{{
-            label: 'Attack Distribution',
+            label: 'Alerts',
             data: {json.dumps(chart_values)},
             backgroundColor: {json.dumps(chart_colors)},
             borderWidth: 1
         }}]
+    }},
+    options: {{
+        plugins: {{
+            legend: {{ display: false }}
+        }},
+        scales: {{
+            y: {{
+                beginAtZero: true,
+                ticks: {{ precision: 0 }}
+            }}
+        }}
     }}
 }});
 </script>

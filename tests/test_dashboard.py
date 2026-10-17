@@ -16,3 +16,12 @@ def test_dashboard_empty_database_shows_no_none(db):
     assert response.status_code == 200
     assert b"Total Alerts" in response.data
     assert b"None" not in response.data
+
+def test_chart_shows_every_attack_type_even_zero(db):
+    db.save_attack("2026-10-17 10:00:00", "192.168.1.200", "BRUTE_FORCE", 20)
+    db.save_attack("2026-10-17 10:00:01", "192.168.1.200", "HIGH_RISK", 30)
+
+    response = app.test_client().get("/")
+
+    assert b'labels: ["BRUTE_FORCE", "PORT_SCAN"]' in response.data
+    assert b"data: [1, 0]" in response.data
