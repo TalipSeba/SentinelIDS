@@ -1,7 +1,13 @@
 from flask import Flask
+import json
 import sqlite3
 
 app = Flask(__name__)
+
+ATTACK_COLORS = {
+    "BRUTE_FORCE": "#fb923c",
+    "PORT_SCAN": "#facc15",
+}
 
 def get_stats():
 
@@ -35,6 +41,7 @@ def get_stats():
     cursor.execute("""
     SELECT event_type, COUNT(*)
     FROM attack_logs
+    WHERE event_type != 'HIGH_RISK'
     GROUP BY event_type
     """)
 
@@ -95,6 +102,7 @@ def home():
 
     chart_labels = [item[0] for item in attack_type_counts]
     chart_values = [item[1] for item in attack_type_counts]
+    chart_colors = [ATTACK_COLORS.get(label, "#38bdf8") for label in chart_labels]
     return f"""
 <html>
 
@@ -215,11 +223,7 @@ for attack in recent_attacks
 {''.join([
 f'''
 <div style="background:#1e293b; padding:20px; border-radius:10px; width:200px;">
-    <h3 style="color:{
-    '#ef4444' if attack_type[0] == 'HIGH_RISK' else
-    '#fb923c' if attack_type[0] == 'BRUTE_FORCE' else
-    '#38bdf8'
-};">
+    <h3 style="color:{ATTACK_COLORS.get(attack_type[0], '#38bdf8')};">
     {attack_type[0]}
 </h3>
     <p>{attack_type[1]}</p>
@@ -264,17 +268,11 @@ const ctx = document.getElementById('attackChart');
 new Chart(ctx, {{
     type: 'pie',
     data: {{
-        labels: {chart_labels},
+        labels: {json.dumps(chart_labels)},
         datasets: [{{
             label: 'Attack Distribution',
-            data: {chart_values},
-            backgroundColor: [
-                '#ef4444',
-                '#fb923c',
-                '#38bdf8',
-                '#22c55e',
-                '#facc15'
-            ],
+            data: {json.dumps(chart_values)},
+            backgroundColor: {json.dumps(chart_colors)},
             borderWidth: 1
         }}]
     }}

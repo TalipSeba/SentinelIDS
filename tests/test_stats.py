@@ -33,6 +33,8 @@ def test_get_stats_honest_counts(db):
     assert stats["high_risk_ips"] == 1
 
 
+    assert dict(stats["attack_type_counts"]) == {"BRUTE_FORCE": 2, "PORT_SCAN": 1}
+
 def test_get_stats_empty_database(db):
     stats = get_stats()
 
