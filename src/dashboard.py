@@ -3,8 +3,7 @@ import sqlite3
 
 app = Flask(__name__)
 
-@app.route("/")
-def home():
+def get_stats():
 
     connection = sqlite3.connect("sentinelids.db")
 
@@ -49,9 +48,32 @@ def home():
     """)
 
     top_attackers = cursor.fetchall()
+    connection.close()
+
+    return {
+        "total_attacks": total_attacks,
+        "max_score": max_score,
+        "dangerous_ip": dangerous_ip,
+        "recent_attacks": recent_attacks,
+        "attack_type_counts": attack_type_counts,
+        "top_attackers": top_attackers,
+    }
+
+
+@app.route("/")
+def home():
+
+    stats = get_stats()
+
+    total_attacks = stats["total_attacks"]
+    max_score = stats["max_score"]
+    dangerous_ip = stats["dangerous_ip"]
+    recent_attacks = stats["recent_attacks"]
+    attack_type_counts = stats["attack_type_counts"]
+    top_attackers = stats["top_attackers"]
+
     chart_labels = [item[0] for item in attack_type_counts]
     chart_values = [item[1] for item in attack_type_counts]
-    connection.close()
     return f"""
 <html>
 
