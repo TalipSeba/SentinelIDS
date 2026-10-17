@@ -16,6 +16,7 @@ def reset_state():
     tracker.ip_ports.clear()
     tracker.failed_logins.clear()
     threat_score.threat_scores.clear()
+    threat_score.high_risk_ips.clear()
     yield
 
 
