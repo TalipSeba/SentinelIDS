@@ -42,3 +42,18 @@ def test_high_risk_at_score_30():
 
 def test_high_risk_unknown_ip():
     assert not is_high_risk("10.0.0.1")
+
+
+def test_port_scan_forgets_ports_outside_window():
+    for second, port in [(0, "21"), (1, "22"), (2, "80")]:
+        track_port(IP, port, now=second)
+
+    # 100 seconds later the first three ports are too old to count
+    track_port(IP, "443", now=100)
+    assert not is_port_scan(IP)
+
+
+def test_port_scan_inside_window():
+    for second, port in [(0, "21"), (10, "22"), (20, "80"), (30, "443")]:
+        track_port(IP, port, now=second)
+    assert is_port_scan(IP)

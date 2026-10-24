@@ -1,3 +1,7 @@
+import time
+
+PORT_SCAN_WINDOW = 60  # seconds
+
 ip_counts = {}
 ip_ports = {}
 
@@ -10,11 +14,20 @@ def track_ip(ip):
     return ip_counts[ip]
 
 
-def track_port(ip, port):
-    if ip not in ip_ports:
-        ip_ports[ip] = set()
+def track_port(ip, port, now=None):
+    if now is None:
+        now = time.time()
 
-    ip_ports[ip].add(port)
+    if ip not in ip_ports:
+        ip_ports[ip] = {}
+
+    # Remember when each port was last seen
+    ip_ports[ip][port] = now
+
+    # Forget ports that are older than the time window
+    for old_port, seen in list(ip_ports[ip].items()):
+        if now - seen > PORT_SCAN_WINDOW:
+            del ip_ports[ip][old_port]
 
     return len(ip_ports[ip])
 
