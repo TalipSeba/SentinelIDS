@@ -25,3 +25,14 @@ def test_chart_shows_every_attack_type_even_zero(db):
 
     assert b'labels: ["BRUTE_FORCE", "PORT_SCAN"]' in response.data
     assert b"data: [1, 0]" in response.data
+
+
+def test_dashboard_shows_hourly_trend(db):
+    db.save_attack("2026-10-17 10:05:00", "192.168.1.200", "BRUTE_FORCE", 20)
+    db.save_attack("2026-10-17 11:15:00", "192.168.1.200", "BRUTE_FORCE", 40)
+
+    response = app.test_client().get("/")
+
+    assert b"trendChart" in response.data
+    assert b'labels: ["2026-10-17 10:00", "2026-10-17 11:00"]' in response.data
+    assert b"data: [1, 1]" in response.data

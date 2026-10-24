@@ -56,6 +56,15 @@ def get_stats():
 
     top_attackers = cursor.fetchall()
 
+    cursor.execute("""
+    SELECT substr(timestamp, 1, 13) AS hour, COUNT(*)
+    FROM attack_logs
+    WHERE event_type != 'HIGH_RISK'
+    GROUP BY hour
+    ORDER BY hour
+    """)
+    hourly_trend = cursor.fetchall()
+
     cursor.execute("SELECT COUNT(DISTINCT ip) FROM attack_logs")
     unique_ips = cursor.fetchone()[0]
 
@@ -77,6 +86,7 @@ def get_stats():
         "recent_attacks": recent_attacks,
         "attack_type_counts": attack_type_counts,
         "top_attackers": top_attackers,
+        "hourly_trend": hourly_trend,
         "unique_ips": unique_ips,
         "brute_force_count": brute_force_count,
         "port_scan_count": port_scan_count,
@@ -104,6 +114,9 @@ def home():
     chart_labels = list(ATTACK_COLORS)
     chart_values = [type_counts.get(label, 0) for label in chart_labels]
     chart_colors = [ATTACK_COLORS.get(label, "#38bdf8") for label in chart_labels]
+    hourly_trend = stats["hourly_trend"]
+    trend_labels = [row[0] + ":00" for row in hourly_trend]
+    trend_values = [row[1] for row in hourly_trend]
     return f"""
 <html>
 
@@ -263,6 +276,17 @@ Attack Distribution Chart
     </p>
 </div>
 
+<h2 style="margin-top:40px;">
+Hourly Alert Trend
+</h2>
+
+<div style="background:#1e293b; padding:20px; border-radius:10px; width:500px; margin-top:20px;">
+    <canvas id="trendChart"></canvas>
+    <p style="margin-top:20px; color:#94a3b8;">
+       Brute force and port scan alerts per hour (HIGH_RISK not counted).
+    </p>
+</div>
+
 <script>
 const ctx = document.getElementById('attackChart');
 
@@ -275,6 +299,31 @@ new Chart(ctx, {{
             data: {json.dumps(chart_values)},
             backgroundColor: {json.dumps(chart_colors)},
             borderWidth: 1
+        }}]
+    }},
+    options: {{
+        plugins: {{
+            legend: {{ display: false }}
+        }},
+        scales: {{
+            y: {{
+                beginAtZero: true,
+                ticks: {{ precision: 0 }}
+            }}
+        }}
+    }}
+}});
+
+new Chart(document.getElementById('trendChart'), {{
+    type: 'line',
+    data: {{
+        labels: {json.dumps(trend_labels)},
+        datasets: [{{
+            label: 'Alerts per hour',
+            data: {json.dumps(trend_values)},
+            borderColor: '#38bdf8',
+            backgroundColor: '#38bdf8',
+            pointRadius: 5
         }}]
     }},
     options: {{

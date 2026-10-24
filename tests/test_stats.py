@@ -45,5 +45,15 @@ def test_get_stats_empty_database(db):
     assert stats["port_scan_count"] == 0
     assert stats["high_risk_ips"] == 0
 
+def test_get_stats_hourly_trend(db):
+    db.save_attack("2026-10-17 10:05:00", "192.168.1.200", "BRUTE_FORCE", 20)
+    db.save_attack("2026-10-17 10:40:00", "192.168.1.50", "PORT_SCAN", 10)
+    db.save_attack("2026-10-17 10:40:00", "192.168.1.200", "HIGH_RISK", 30)
+    db.save_attack("2026-10-17 11:15:00", "192.168.1.200", "BRUTE_FORCE", 40)
+
+    stats = get_stats()
+
+    assert stats["hourly_trend"] == [("2026-10-17 10", 2), ("2026-10-17 11", 1)]
+
 
 
