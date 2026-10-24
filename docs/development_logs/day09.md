@@ -1,4 +1,3 @@
-cat > docs/development_logs/day09.md <<'MDEOF'
 # Day 9 — Honest Dashboard Statistics and Automated Tests
 
 ## What Was Done?
@@ -98,4 +97,3 @@ These were observed today. They are not fixed yet:
 - Add a `source` column (`simulated` / `live`) to keep test and real data separate
 - Decide what to do with `sentinelids.db` being tracked by Git
 - First real data source: SSH login failures from system logs
-MDEOF
