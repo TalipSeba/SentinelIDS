@@ -56,4 +56,16 @@ def test_get_stats_hourly_trend(db):
     assert stats["hourly_trend"] == [("2026-10-17 10", 2), ("2026-10-17 11", 1)]
 
 
+def test_get_stats_last_seen(db):
+    db.save_attack("2026-10-17 10:05:00.123456", "192.168.1.200", "BRUTE_FORCE", 20)
+    db.save_attack("2026-10-17 11:15:00.654321", "192.168.1.200", "BRUTE_FORCE", 40)
 
+    stats = get_stats()
+
+    assert stats["last_seen"] == "2026-10-17 11:15:00.654321"
+
+
+def test_get_stats_last_seen_empty_database(db):
+    stats = get_stats()
+
+    assert stats["last_seen"] is None

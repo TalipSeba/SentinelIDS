@@ -77,6 +77,9 @@ def get_stats():
     cursor.execute("SELECT COUNT(DISTINCT ip) FROM attack_logs WHERE event_type = 'HIGH_RISK'")
     high_risk_ips = cursor.fetchone()[0]
 
+    cursor.execute("SELECT MAX(timestamp) FROM attack_logs")
+    last_seen = cursor.fetchone()[0]
+
     connection.close()
 
     return {
@@ -87,6 +90,7 @@ def get_stats():
         "attack_type_counts": attack_type_counts,
         "top_attackers": top_attackers,
         "hourly_trend": hourly_trend,
+        "last_seen": last_seen,
         "unique_ips": unique_ips,
         "brute_force_count": brute_force_count,
         "port_scan_count": port_scan_count,
@@ -109,6 +113,7 @@ def home():
     brute_force_count = stats["brute_force_count"]
     port_scan_count = stats["port_scan_count"]
     high_risk_ips = stats["high_risk_ips"]
+    last_seen = stats["last_seen"]
 
     type_counts = dict(attack_type_counts)
     chart_labels = list(ATTACK_COLORS)
@@ -136,11 +141,15 @@ def home():
         SentinelIDS Dashboard
     </h1>
 
+    <p style="color:#94a3b8;">
+        Data source: simulated test traffic (traffic_generator.py). This is not real network traffic.
+    </p>
+
     <div style="display:flex; gap:20px; margin-top:20px;">
 
     <div style="background:#1e293b; padding:20px; border-radius:10px; width:250px;">
-        <h3>System Status</h3>
-        <h2 style="color:#22c55e;">ACTIVE</h2>
+        <h3>Last Record</h3>
+        <h2 style="color:#22c55e; font-size:20px;">{last_seen[:19] if last_seen else "-"}</h2>
     </div>
 
     <div style="background:#1e293b; padding:20px; border-radius:10px; width:250px;">
@@ -200,6 +209,7 @@ def home():
 
 <tr style="border-bottom:1px solid #334155;">
     <th>ID</th>
+    <th>Time</th>
     <th>IP</th>
     <th>Event</th>
     <th>Threat Score</th>
@@ -209,6 +219,7 @@ def home():
 f'''
 <tr>
     <td>{attack[0]}</td>
+    <td>{attack[1][:19]}</td>
     <td>{attack[2]}</td>
     <td style="color:{
     '#ef4444' if attack[3] == 'HIGH_RISK' else
@@ -257,7 +268,7 @@ Top Attacker IPs
 f'''
 <div style="background:#1e293b; padding:20px; border-radius:10px; width:250px;">
     <h3 style="color:#facc15;">{attacker[0]}</h3>
-    <p>{attacker[1]} attacks</p>
+    <p>{attacker[1]} alerts</p>
 </div>
 '''
 for attacker in top_attackers
@@ -272,7 +283,7 @@ Attack Distribution Chart
     <canvas id="attackChart"></canvas>
     <p style="margin-top:20px; color:#94a3b8;">
        Dashboard updates automatically every 5 seconds.
-       Attack statistics are generated from live SQLite logs.
+       Statistics are read from the SQLite alert log (sentinelids.db).
     </p>
 </div>
 
